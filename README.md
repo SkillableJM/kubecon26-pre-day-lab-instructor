@@ -126,5 +126,5 @@ clone it again.
 
 ## Local files that aren't in git
 
-`.lab/` (ignored by git): the leaderboard's settings and token (`.lab/leaderboard/`), and the shared model's endpoint
-and key (`.lab/skillable/model.json`). Never commit them.
+`.lab/` (ignored by git): the leaderboard's settings and token (`.lab/leaderboard/`), the shared model's endpoint
+and key (`.lab/skillable/model.json`), and archived Terraform state (`.lab/archive/`). Never commit them.

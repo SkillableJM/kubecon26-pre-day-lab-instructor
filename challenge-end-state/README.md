@@ -98,6 +98,10 @@ shows a fix exactly.
 cd challenge-end-state/terraform && terraform destroy
 ```
 
+The bash and PowerShell deploy scripts write the solved manifests, with their placeholders filled in, to the lab
+repository's `.lab/rendered/<resource group>` folder, which git ignores; the cleanup scripts delete it. So run them
+on your own machine, never on a lab VM.
+
 Clusters created by the Azure CLI deployments keep their monitoring data in the lab resource group (Azure Monitor
 workspace `amw-ctf-<id>` for Managed Prometheus, Log Analytics workspace `law-ctf-<id>` for Container Insights),
 so the cleanup removes it. Clusters created by earlier versions of these scripts used the `az aks create` defaults
