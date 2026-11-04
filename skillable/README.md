@@ -16,6 +16,7 @@ them from its clone of that repository. The runbooks are here:
 | The lab instructions to import into Skillable Studio (generated: don't edit them) | Lab repository: [`skillable/skillable lab steps.md`](https://github.com/bbenz/kubecon26-pre-day-lab/blob/main/skillable/skillable%20lab%20steps.md) | [The lab instructions](#the-lab-instructions) |
 | The generator and its template | Lab repository: [`skillable/build-lab-steps.ps1`](https://github.com/bbenz/kubecon26-pre-day-lab/blob/main/skillable/build-lab-steps.ps1), [`skillable/lab-steps-template.md`](https://github.com/bbenz/kubecon26-pre-day-lab/blob/main/skillable/lab-steps-template.md) | [The lab instructions](#the-lab-instructions) |
 | The leaderboard's LCA (optional) | This repository: [`leaderboard`](../leaderboard/README.md) | [leaderboard/README.md](../leaderboard/README.md) |
+| What the lab profile's access control policy must allow, with a message for Skillable | This repository | [AZURE-RESOURCES.md](AZURE-RESOURCES.md) |
 
 ## How a lab launches
 
@@ -83,7 +84,8 @@ Two prerequisites aren't VM settings:
 - [ ] VM image built and committed with the image setup script from that tag ([VM image runbook](VM-IMAGE-RUNBOOK.md))
 - [ ] Profile: cloud subscription pool; resource group `ResourceGroup1` with **Override Region** (AKS Automatic,
       and `gpt-6-luna` Global Standard for C4); portal user `User1` with Contributor
-- [ ] Access control policy allows the resource types in the [LCA runbook](LCA-RUNBOOK.md#before-you-start)
+- [ ] Access control policy allows everything in [AZURE-RESOURCES.md](AZURE-RESOURCES.md), including the role
+      assignments
 - [ ] Quota per lab subscription: about 16 to 24 D-family vCPUs, and 50,000 TPM of `gpt-6-luna` Global Standard
 - [ ] Prepare and readiness gate LCAs added ([settings](LCA-RUNBOOK.md#add-the-lcas-in-skillable)), with `RepoRef`
       set to the event's tag, and a pool admin has turned on the prepare LCA's cloud credentials

@@ -21,7 +21,7 @@ instructions. It's public, every lab VM has a copy, and attendees can take it ho
 | A challenge in detail | Its SOLUTION.md (table below): the full walkthrough with commands and expected output |
 | Choosing the line-up | [FEASIBILITY.md](FEASIBILITY.md): assessments, the recommended four rounds, and the 3-hour timing plan |
 | The projected leaderboard | [leaderboard/README.md](leaderboard/README.md) |
-| Building the Skillable lab | [skillable/README.md](skillable/README.md), [the LCA runbook](skillable/LCA-RUNBOOK.md), [the VM image runbook](skillable/VM-IMAGE-RUNBOOK.md) |
+| Building the Skillable lab | [skillable/README.md](skillable/README.md), [the LCA runbook](skillable/LCA-RUNBOOK.md), [the VM image runbook](skillable/VM-IMAGE-RUNBOOK.md), and [what the access control policy must allow](skillable/AZURE-RESOURCES.md) |
 | Testing the lab | [docs/testing.md](docs/testing.md) |
 
 ## The challenges

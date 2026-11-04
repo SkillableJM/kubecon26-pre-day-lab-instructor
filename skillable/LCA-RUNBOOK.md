@@ -135,14 +135,14 @@ Each result ends with `Summary for troubleshooting: <the log's copy in .lab\skil
   **Override Region** set to the event's region (`westus3` is the tested default), where AKS Automatic is generally
   available and the C4 model is offered as Global Standard; and a cloud portal user, `User1`, with the Contributor
   role in the resource group's **Permissions**. No cloud resource template: the LCA deploys the resources.
-- **Access control policy (ACP):** allow the resource types that the begin state creates: `Microsoft.ContainerService/managedClusters`
-  (Automatic SKU) and what AKS creates in its node resource group (virtual machine scale sets, load balancers,
-  public IP addresses, virtual networks, network security groups, managed disks); `Microsoft.Monitor/accounts`;
-  `Microsoft.OperationalInsights/workspaces`; `Microsoft.Insights` data collection rules, endpoints, and
-  associations; `Microsoft.AlertsManagement/prometheusRuleGroups`; `Microsoft.CognitiveServices/accounts` and
-  their deployments; `Microsoft.KeyVault/vaults`; `Microsoft.ManagedIdentity/userAssignedIdentities` and their
-  federated credentials; `Microsoft.KubernetesConfiguration/extensions`; and the D-family VM sizes that node
-  autoprovisioning picks.
+- **Access control policy (ACP):** allow everything in [What the Skillable access control policy must allow](AZURE-RESOURCES.md),
+  which has a message for Skillable. A resource scrape misses part of it, notably the role assignments
+  (`Microsoft.Authorization/roleAssignments`): the prepare LCA's first one, Azure Kubernetes Service RBAC Cluster Admin
+  for the service principal, is where the first Skillable launch stopped. Also: what AKS creates in the node resource
+  group (individual VMs and their extensions, network interfaces, and disks, a NAT gateway, load balancers, public IP
+  addresses, and managed identities), Azure Monitor's `MA_..._managed` resource group, child resources such as
+  federated identity credentials, the Foundry model deployment, and the Key Vault secret, and the D-family VM sizes
+  that node autoprovisioning picks.
 - **Quota in each lab subscription and region:** about 16 to 24 D-family vCPUs (two to four NAP nodes) and
   50,000 tokens per minute of `gpt-6-luna` (`2026-09-22`) Global Standard for C4. Without the model quota, the
   begin state fails at C4: confirm it with Skillable, or leave `c4` out of `Challenges`.
@@ -302,6 +302,9 @@ that it has the attendee's `@lab.User` name. Never commit the generated script.
 | `The service principal couldn't sign in and see the subscription within 5 minutes` | Read the last error. Check the pool's health in Skillable Studio, and relaunch. |
 | **WARN** Resource providers: `Can't read the subscription's resource providers` | The service principal has no subscription-level read. The deployment fails later if a provider is missing: register them in the pool, or use `manual-test-access.ps1`. |
 | **FAIL** Begin state (deploy.ps1) | Read the `\|` lines before it in the log, which are `deploy.ps1`'s output. Usual causes: `RequestDisallowedByPolicy` (the ACP blocks a type, region, or size), `InsufficientQuota` or `quota` at C4 (no `gpt-6-luna` Global Standard quota: ask Skillable, or leave `c4` out), or a region without AKS Automatic. Fix the cause and retry: `deploy.ps1` reuses what exists. |
+| **FAIL** Begin state, after **Kubernetes data-plane access (Azure RBAC)**: `Could not assign 'Azure Kubernetes Service RBAC Cluster Admin' ... (RequestDisallowedByPolicy)` | The ACP denies role assignments; the message names the policy assignment. Send Skillable the [message in AZURE-RESOURCES.md](AZURE-RESOURCES.md#message-for-skillable): it lists every role assignment that a launch makes, so the next one doesn't stop it too. The same error can name another role later in the log, such as Cognitive Services OpenAI User (C4) or Key Vault Secrets User (A4). |
+| **FAIL** Begin state: `Could not assign '<role>' ... (AuthorizationFailed)` | The service principal may not create role assignments: it isn't Owner (or User Access Administrator, or Role Based Access Control Administrator) of the lab's subscription, or a condition limits which roles it can assign. Ask Skillable. In a manual run, the cloud portal user needs Owner on the resource group: see [Build the begin state by hand](#build-the-begin-state-by-hand). |
+| **WARN** Portal user access: `Couldn't assign '<role>' ... (RequestDisallowedByPolicy)` or `(AuthorizationFailed)` | The same causes, for the portal user's roles. The readiness gate then fails **Portal user access**, because the attendee's `kubectl` needs Azure Kubernetes Service RBAC Cluster Admin. |
 | **WARN** Portal user access: `Couldn't find the object ID of the portal user` | The service principal can't read Microsoft Graph, and not exactly one user has a role on the resource group. Check `PortalUser` and the resource group's **Permissions**. |
 | **WARN** Inspektor Gadget | Read the error. `RequestDisallowedByPolicy`: the ACP must allow `Microsoft.KubernetesConfiguration/extensions`. `No Inspektor Gadget pod is ready after 4 minutes`: the lab's nodes are full; the pods start when NAP or the challenges free room. The lab works without it: A1 lists it as optional. |
 | **FAIL** Challenge workloads: `No pods in: <namespace>` | That challenge didn't deploy. Read `deploy.ps1`'s output for it in the log, and retry. |
