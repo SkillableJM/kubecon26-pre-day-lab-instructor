@@ -166,10 +166,11 @@ In Skillable Studio, edit the lab profile, and select **Life Cycle Actions**.
 | --- | --- | --- | --- |
 | Name | KubeCon CTF prepare | KubeCon CTF readiness gate | KubeCon CTF manual test access |
 | Action | Execute Script in Virtual Machine | Execute Script in Virtual Machine | Execute Script in Cloud Platform |
+| Virtual machine | The lab VM | The lab VM | None: it runs in Skillable's cloud platform |
 | Language | PowerShell | PowerShell | PowerShell |
 | Event | First Displayable | Running Preinstance Assigned To User | Post-Build |
 | Blocking | Yes | Yes | No |
-| Delay | 60 seconds | 0 | 0 |
+| Delay | 60 seconds, so that automatic sign-in finishes first | 0 | 0 |
 | Timeout | 60 minutes | 20 minutes | 10 minutes |
 | Retries | 2 | 0 | 0 |
 | Error action | End Lab (event) or Log (testing) | Notify user ("Your lab environment isn't ready. Ask a proctor for another lab.") | Log |
@@ -178,6 +179,18 @@ In Skillable Studio, edit the lab profile, and select **Life Cycle Actions**.
 Paste the scripts from the `.ps1` files, not from a document or chat: they're ASCII only, and a copy that turns
 quotes into curly quotes makes Skillable report unsupported characters. In each script, change `ResourceGroup1`
 and `User1` if the profile uses other names.
+
+In order:
+
+1. In the prepare LCA's [settings block](#settings), set `RepoRef`, `GateFailsPrepare`, and the rest first, and
+   save it with its **CLOUD CREDENTIALS** section still commented out.
+2. Ask a pool admin to turn the credentials on ([The pool's secure tokens](#the-pools-secure-tokens)). Until then,
+   the prepare LCA stops at once with a message that points to them. After that, only a pool admin can save it.
+3. The readiness gate LCA runs only when a running preinstance is assigned to an attendee. On a test launch
+   without preinstances, run the gate yourself ([Test a launch](#test-a-launch), step 5), so that it removes the
+   service principal's sign-in from the VM. A profile that never uses preinstances needs
+   `RemoveCredentials = 'AfterPrepare'`.
+4. Don't add the manual test access LCA to the event's profile, and keep `User1` at Contributor there.
 
 ## Settings
 
