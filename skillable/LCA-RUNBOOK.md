@@ -92,7 +92,7 @@ release, and ask the pool admin to change only `RepoRef`.
 | Start | Writes `config.json` (only SYSTEM and administrators can open `C:\ProgramData\kubecon-ctf-lca`), and starts the worker from the clone in the **KubeCon CTF LCA worker** scheduled task, as SYSTEM, with a 3-hour limit. A retry of the LCA waits for the running worker instead of starting another. A run with the same settings and commit after a successful run does nothing else. |
 | Lab repository | Keeps only the checked-out commit: deletes every other branch, tag, and remote-tracking reference, expires the reflog, and runs `git gc`, so the clone has no history to look through. Only on a shallow clone, so it never touches a developer's full clone. Warning only. |
 | Azure sign-in | The service principal, in the worker's own Azure CLI profile, with retries for up to 5 minutes |
-| Resource group | Reads the resource group's region. The lab's resources go there, unless `Location` is set. |
+| Resource group | Reads the resource group's region. The lab's resources go there, unless `Location` is set. C4's Foundry account goes to westus3 instead when that region doesn't offer the model. |
 | Resource providers | Registers missing providers, and waits up to 10 minutes: ContainerService, Compute, Network, ManagedIdentity, PolicyInsights, CognitiveServices, KeyVault, Monitor, Insights, OperationalInsights, AlertsManagement, Dashboard, Storage, KubernetesConfiguration. Warning only. |
 | Begin state | Runs the clone's `deploy.ps1 -ResourceGroup <rg> -Location <region> -ClusterName aks-kubecon-ctf -Challenges <list>`: Azure Monitor and Log Analytics workspaces, the AKS Automatic cluster with the application routing add-on (managed NGINX and Gateway API), Managed Prometheus, the C4 Foundry account and model deployment, the A4 Key Vault and identity, and each challenge with its seeded fault. It renders the manifests in the clone's `.lab\rendered\<resource group>`. Its output is in the log. Required: the LCA fails if it fails. |
 | Portal user access | The portal user's roles (see [Identities and roles](#identities-and-roles)). Warning only; the readiness gate fails without the cluster role. |
@@ -134,7 +134,9 @@ Each result ends with `Summary for troubleshooting: <the log's copy in .lab\skil
 - **Cloud resources in the profile:** a cloud subscription pool; a resource group, `ResourceGroup1`, with
   **Override Region** set to the event's region (`westus3` is the tested default), where AKS Automatic is generally
   available and the C4 model is offered as Global Standard; and a cloud portal user, `User1`, with the Contributor
-  role in the resource group's **Permissions**. No cloud resource template: the LCA deploys the resources.
+  role in the resource group's **Permissions**. No cloud resource template: the LCA deploys the resources. Without
+  an Override Region, a launch can land in a region that offers no OpenAI models, as westcentralus did: `deploy.ps1`
+  then creates the Foundry account in westus3, which the ACP must allow ([Regions](AZURE-RESOURCES.md#regions)).
 - **Access control policy (ACP):** allow everything in [What the Skillable access control policy must allow](AZURE-RESOURCES.md),
   which has a message for Skillable. A resource scrape misses part of it, notably the role assignments
   (`Microsoft.Authorization/roleAssignments`): the prepare LCA's first one, Azure Kubernetes Service RBAC Cluster Admin
@@ -144,8 +146,8 @@ Each result ends with `Summary for troubleshooting: <the log's copy in .lab\skil
   federated identity credentials, the Foundry model deployment, and the Key Vault secret, and the D-family VM sizes
   that node autoprovisioning picks.
 - **Quota in each lab subscription and region:** about 16 to 24 D-family vCPUs (two to four NAP nodes) and
-  50,000 tokens per minute of `gpt-6-luna` (`2026-09-22`) Global Standard for C4. Without the model quota, the
-  begin state fails at C4: confirm it with Skillable, or leave `c4` out of `Challenges`.
+  50,000 tokens per minute of `gpt-6-luna` (`2026-09-22`) Global Standard for C4, in the Foundry account's region.
+  Without the model quota, the begin state fails at C4: confirm it with Skillable, or leave `c4` out of `Challenges`.
 - **Preinstances:** the begin state takes 20 to 30 minutes (20 in testing, 18 of them in `deploy.ps1`), so use
   running preinstances with at least 45 minutes of lead time, plus spares.
 - **GitHub Copilot:** attendees sign in to GitHub in VS Code with an account that has a Copilot seat. If the
@@ -250,6 +252,11 @@ cloud portal user, in a running lab:
    the readiness gate in the window, and takes 20 to 30 minutes. To run it again, run
    `powershell -ExecutionPolicy Bypass -File C:\LabSetup\kubecon-ctf-begin-state.ps1` as administrator.
 
+A manual run is as the resource group's Owner, which can't purge deleted Foundry accounts: that needs
+subscription-level access. So a lab where a run before November 5, 2026 left the Foundry account in a region
+without the model (westcentralus) can't fix it by hand: `deploy.ps1` stops at C4 with the two commands to run with
+an identity that has that access, and leaves the account as it is. Launch a new lab instead.
+
 Outside Skillable, you can also run the deployment directly from a clone of the lab repository, the way its README
 describes: `pwsh ./begin-challenge/azure-cli-powershell/deploy.ps1 -ResourceGroup <rg>`. Never clone the
 instructors' repository in a lab VM that an attendee gets.
@@ -302,6 +309,7 @@ that it has the attendee's `@lab.User` name. Never commit the generated script.
 | `The service principal couldn't sign in and see the subscription within 5 minutes` | Read the last error. Check the pool's health in Skillable Studio, and relaunch. |
 | **WARN** Resource providers: `Can't read the subscription's resource providers` | The service principal has no subscription-level read. The deployment fails later if a provider is missing: register them in the pool, or use `manual-test-access.ps1`. |
 | **FAIL** Begin state (deploy.ps1) | Read the `\|` lines before it in the log, which are `deploy.ps1`'s output. Usual causes: `RequestDisallowedByPolicy` (the ACP blocks a type, region, or size), `InsufficientQuota` or `quota` at C4 (no `gpt-6-luna` Global Standard quota: ask Skillable, or leave `c4` out), or a region without AKS Automatic. Fix the cause and retry: `deploy.ps1` reuses what exists. |
+| **FAIL** Begin state, at **C4**: `SpecialFeatureOrQuotaIdRequired` ... `does not have access to this model` | The Foundry account is in a region that doesn't offer the model: westcentralus offers no OpenAI models. Since November 5, 2026, `deploy.ps1` creates the account in a region that offers it (westus3, for westcentralus), and a retry re-creates an account that an earlier run left in the wrong region, which adds about 3 minutes. That needs the service principal: a manual run, as the resource group's Owner, can't purge the old account, so it stops with the commands to run (see [Build the begin state by hand](#build-the-begin-state-by-hand)). If it still fails in the new region, the subscription has no access to the model there: ask Skillable, or leave `c4` out. |
 | **FAIL** Begin state, after **Kubernetes data-plane access (Azure RBAC)**: `Could not assign 'Azure Kubernetes Service RBAC Cluster Admin' ... (RequestDisallowedByPolicy)` | The ACP denies role assignments; the message names the policy assignment. Send Skillable the [message in AZURE-RESOURCES.md](AZURE-RESOURCES.md#message-for-skillable): it lists every role assignment that a launch makes, so the next one doesn't stop it too. The same error can name another role later in the log, such as Cognitive Services OpenAI User (C4) or Key Vault Secrets User (A4). |
 | **FAIL** Begin state: `Could not assign '<role>' ... (AuthorizationFailed)` | The service principal may not create role assignments: it isn't Owner (or User Access Administrator, or Role Based Access Control Administrator) of the lab's subscription, or a condition limits which roles it can assign. Ask Skillable. In a manual run, the cloud portal user needs Owner on the resource group: see [Build the begin state by hand](#build-the-begin-state-by-hand). |
 | **WARN** Portal user access: `Couldn't assign '<role>' ... (RequestDisallowedByPolicy)` or `(AuthorizationFailed)` | The same causes, for the portal user's roles. The readiness gate then fails **Portal user access**, because the attendee's `kubectl` needs Azure Kubernetes Service RBAC Cluster Admin. |

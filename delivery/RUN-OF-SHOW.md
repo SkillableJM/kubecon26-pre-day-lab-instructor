@@ -68,8 +68,8 @@ round start the next one with everyone else, and can come back to it later.
 - [ ] Confirm the line-up and the swaps in [FEASIBILITY.md](../FEASIBILITY.md).
 - [ ] Re-check what the event month can change: the application routing add-on's NGINX can still be enabled (its
       security patches end in November 2026); Gateway API and `approuting-istio` on AKS Automatic; the model for C4
-      (`gpt-6-luna`, `GlobalStandard`) and its quota in the Skillable subscriptions' region; and C3's VM sizes in that
-      region (`az vm list-skus`).
+      (`gpt-6-luna`, `GlobalStandard`) and its quota in the Skillable subscriptions' region, or in westus3 if that
+      region offers no OpenAI models, as westcentralus doesn't; and C3's VM sizes in that region (`az vm list-skus`).
 - [ ] In the lab repository: `./skillable/build-lab-steps.ps1 -Check` passes, and the lab instructions are imported
       from the same commit. Tag the commit for the event (such as `v1.0.0`), and set the prepare LCA's `RepoRef` to
       the tag (a pool admin saves it: [the LCA runbook](../skillable/LCA-RUNBOOK.md)).

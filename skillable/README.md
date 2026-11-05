@@ -83,7 +83,8 @@ Two prerequisites aren't VM settings:
       passes there
 - [ ] VM image built and committed with the image setup script from that tag ([VM image runbook](VM-IMAGE-RUNBOOK.md))
 - [ ] Profile: cloud subscription pool; resource group `ResourceGroup1` with **Override Region** (AKS Automatic,
-      and `gpt-6-luna` Global Standard for C4); portal user `User1` with Contributor
+      and `gpt-6-luna` Global Standard for C4, or an ACP that allows the Foundry account in westus3:
+      [Regions](AZURE-RESOURCES.md#regions)); portal user `User1` with Contributor
 - [ ] Access control policy allows everything in [AZURE-RESOURCES.md](AZURE-RESOURCES.md), including the role
       assignments
 - [ ] Quota per lab subscription: about 16 to 24 D-family vCPUs, and 50,000 TPM of `gpt-6-luna` Global Standard

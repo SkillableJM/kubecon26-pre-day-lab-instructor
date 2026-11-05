@@ -54,7 +54,7 @@ repository.
 | `Microsoft.Insights/dataCollectionEndpoints` | `MSProm-<region>-aks-kubecon-ctf` | |
 | `Microsoft.Insights/dataCollectionRules` | `MSProm-<region>-aks-kubecon-ctf`, `MSCI-<region>-aks-kubecon-ctf` | |
 | `Microsoft.AlertsManagement/prometheusRuleGroups` | Six recording rule groups for `aks-kubecon-ctf` | |
-| `Microsoft.CognitiveServices/accounts` | `aoai-ctf-<id>` | Kind `AIServices`, SKU `S0`, key authentication off (C4) |
+| `Microsoft.CognitiveServices/accounts` | `aoai-ctf-<id>` | Kind `AIServices`, SKU `S0`, key authentication off (C4). In the resource group's region when it offers the C4 model, otherwise in westus3 (see [Regions](#regions)) |
 | `Microsoft.KeyVault/vaults` | `kv-ctf-<id>` | SKU `standard`, Azure RBAC, 7-day soft delete (A4) |
 | `Microsoft.ManagedIdentity/userAssignedIdentities` | `id-ctf-ai-service` (C4), `id-ctf-config-reader` (A4) | |
 
@@ -112,8 +112,13 @@ The prepare LCA registers these resource providers when they aren't registered: 
 
 ## Regions
 
-Tested in westus3. The event's region needs AKS Automatic, and `gpt-6-luna` as `GlobalStandard` with 50,000 tokens
-per minute of quota for each lab.
+Tested in westus3, where everything is in one region. The event's region needs AKS Automatic. C4's model,
+`gpt-6-luna` as `GlobalStandard` with 50,000 tokens per minute of quota for each lab, can be in another region: when
+the resource group's region doesn't offer it, `deploy.ps1` creates the Foundry account in the first of westus3,
+eastus2, and swedencentral that does. Some regions offer no OpenAI models at all: westcentralus, where a Skillable
+launch landed without an **Override Region** on 2026-11-05, is one (its deployment failed with
+`SpecialFeatureOrQuotaIdRequired`). So either set the **Override Region** to a region that offers the model, such as
+westus3, or make sure the ACP allows `Microsoft.CognitiveServices/accounts` in westus3.
 
 ## Message for Skillable
 
@@ -158,7 +163,8 @@ Other things a resource scrape doesn't show, which the lab also needs:
 - Resource provider registrations by the service principal: Microsoft.ContainerService, Compute, Network,
   ManagedIdentity, PolicyInsights, CognitiveServices, KeyVault, Monitor, Insights, OperationalInsights,
   AlertsManagement, Dashboard, Storage, and KubernetesConfiguration.
-- Region: <event region>.
+- Region: <event region>. The Microsoft Foundry account and its model deployment go to westus3 when the event region
+  doesn't offer the model (westcentralus offers no OpenAI models).
 
 If the error is AuthorizationFailed instead of RequestDisallowedByPolicy, the service principal can't create role
 assignments at all: please make it Owner of the lab's subscription, as for LAB723.
