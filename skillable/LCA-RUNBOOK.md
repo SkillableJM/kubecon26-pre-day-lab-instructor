@@ -132,11 +132,12 @@ Each result ends with `Summary for troubleshooting: <the log's copy in .lab\skil
   ([VM image runbook](VM-IMAGE-RUNBOOK.md)). Automatic sign-in and the Skillable integration service must work.
   Size: 4 vCPUs and 16 GiB (D4s_v5 class), the lab design's VM.
 - **Cloud resources in the profile:** a cloud subscription pool; a resource group, `ResourceGroup1`, with
-  **Override Region** set to the event's region (`westus3` is the tested default), where AKS Automatic is generally
-  available and the C4 model is offered as Global Standard; and a cloud portal user, `User1`, with the Contributor
-  role in the resource group's **Permissions**. No cloud resource template: the LCA deploys the resources. Without
-  an Override Region, a launch can land in a region that offers no OpenAI models, as westcentralus did: `deploy.ps1`
-  then creates the Foundry account in westus3, which the ACP must allow ([Regions](AZURE-RESOURCES.md#regions)).
+  **Override Data Center** set to the event's region (West US 3 is the tested default, and the profile's setting
+  since November 5, 2026), where AKS Automatic is generally available and the C4 model is offered as Global
+  Standard; and a cloud portal user, `User1`, with the Contributor role in the resource group's **Permissions**. No
+  cloud resource template: the LCA deploys the resources. Without an Override Data Center, a launch can land in a
+  region that offers no OpenAI models, as westcentralus did: `deploy.ps1` then creates the Foundry account in
+  westus3, which the ACP must allow ([Regions](AZURE-RESOURCES.md#regions)).
 - **Access control policy (ACP):** allow everything in [What the Skillable access control policy must allow](AZURE-RESOURCES.md),
   which has a message for Skillable. A resource scrape misses part of it, notably the role assignments
   (`Microsoft.Authorization/roleAssignments`): the prepare LCA's first one, Azure Kubernetes Service RBAC Cluster Admin
@@ -185,7 +186,7 @@ The settings block near the top of `prepare-lab-environment.ps1`:
 | Setting | Default | Meaning |
 | --- | --- | --- |
 | `ResourceGroup`, `PortalUser` | `@lab.CloudResourceGroup(ResourceGroup1).Name`, `@lab.CloudPortalCredential(User1).Username` | Skillable replaces them |
-| `Location` | Empty | Empty uses the resource group's region. Set the resource group's **Override Region** instead, where possible. |
+| `Location` | Empty | Empty uses the resource group's region. Set the resource group's **Override Data Center** instead, where possible. |
 | `ClusterName` | `aks-kubecon-ctf` | Also the kubectl context name. The lab instructions' reset command uses it. |
 | `Challenges` | `all` | Or a list, such as `c1,c2,c3,c4` |
 | `InspektorGadget` | `$false` | `$true` adds the Inspektor Gadget AKS cluster extension (preview), for A1's optional DNS tracing. See **Inspektor Gadget** in [What the prepare LCA does](#what-the-prepare-lca-does) for its limits on AKS Automatic. Attendees can also deploy it themselves, or through AKS-MCP. |

@@ -116,9 +116,10 @@ Tested in westus3, where everything is in one region. The event's region needs A
 `gpt-6-luna` as `GlobalStandard` with 50,000 tokens per minute of quota for each lab, can be in another region: when
 the resource group's region doesn't offer it, `deploy.ps1` creates the Foundry account in the first of westus3,
 eastus2, and swedencentral that does. Some regions offer no OpenAI models at all: westcentralus, where a Skillable
-launch landed without an **Override Region** on 2026-11-05, is one (its deployment failed with
-`SpecialFeatureOrQuotaIdRequired`). So either set the **Override Region** to a region that offers the model, such as
-westus3, or make sure the ACP allows `Microsoft.CognitiveServices/accounts` in westus3.
+launch landed without an **Override Data Center** on 2026-11-05, is one (its deployment failed with
+`SpecialFeatureOrQuotaIdRequired`). So either set the resource group's **Override Data Center** to a region that
+offers the model, such as West US 3, or make sure the ACP allows `Microsoft.CognitiveServices/accounts` in westus3.
+The lab profile's Override Data Center is West US 3 since 2026-11-05.
 
 ## Message for Skillable
 
