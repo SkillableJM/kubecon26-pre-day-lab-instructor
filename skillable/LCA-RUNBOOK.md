@@ -19,7 +19,7 @@ clone of it in `C:\LabFiles\kubecon26-pre-day-lab`.
 | [`manual-test-access.ps1`](https://github.com/bbenz/kubecon26-pre-day-lab/blob/main/skillable/lca/manual-test-access.ps1) | Pasted into a cloud platform LCA, **test profiles only** | Gives the cloud portal user Owner on the resource group and registers the resource providers, so you can build the begin state by hand. |
 | [`manual-begin-state-bootstrap.txt`](https://github.com/bbenz/kubecon26-pre-day-lab/blob/main/skillable/lca/manual-begin-state-bootstrap.txt) | Pasted into PowerShell in a lab VM | The prepare LCA with `Manual = $true`, compressed: builds the begin state by hand, as you. See [Build the begin state by hand](#build-the-begin-state-by-hand). |
 | [`make-bootstraps.ps1`](https://github.com/bbenz/kubecon26-pre-day-lab/blob/main/skillable/make-bootstraps.ps1) | Your computer | Regenerates the bootstraps after you change `prepare-lab-environment.ps1` or the VM image script. |
-| [`leaderboard/skillable/lca-windows.ps1`](../leaderboard/skillable/lca-windows.ps1) (this repository) | Optional second LCA | Registers the VM with the event leaderboard. `leaderboard/setup.ps1` generates the real script, with its token; see [The event leaderboard](#the-event-leaderboard-optional). |
+| [`leaderboard/skillable/lca-windows.ps1`](../leaderboard/skillable/lca-windows.ps1) (this repository) | Not used: attendees join the leaderboard from the lab instructions | An alternative way to register VMs with the event leaderboard, for a profile that you can change before the event. `leaderboard/setup.ps1` generates the real script, with its token; see [The event leaderboard](#the-event-leaderboard-optional). |
 
 An earlier version of this runbook had a second LCA, a readiness gate at **Running Preinstance Assigned To User**.
 Skillable runs scripts in a virtual machine only at First Displayable, Saving, Resumed, and Tearing Down, so it
@@ -316,13 +316,18 @@ instructors' repository in a lab VM that an attendee gets.
 
 ## The event leaderboard (optional)
 
-The verify scripts can report results to an event leaderboard ([leaderboard/README.md](../leaderboard/README.md)).
-`leaderboard/setup.ps1` writes `.lab/leaderboard/skillable-lca-windows.ps1`, a second VM LCA with the
-leaderboard's write-only token, for the event **First Displayable**. Never commit the generated script. Skillable
-runs scripts in a virtual machine only at First Displayable, Saving, Resumed, and Tearing Down, and with running
-preinstances, First Displayable comes before an attendee is assigned, so its `@lab.User` name may not be the
-attendee's. Check a preinstance's leaderboard name before the event: if it isn't the attendee's, the leaderboard
-needs another way to name players.
+The verify scripts can report results to an event leaderboard ([leaderboard/README.md](../leaderboard/README.md)). It
+needs no LCA, and no change to the lab profile on the day of the event: attendees who want to appear on it join with
+one command in the lab instructions (**Get started**, Task 6), which runs the lab repository's
+`scoring/join-leaderboard.ps1` with Skillable's `@lab.User.Id`, `@lab.User.FirstName`, and `@lab.User.LastName`.
+Skillable fills those in when it shows the instructions, after it assigns the lab, so the names are the attendee's,
+also with running preinstances. The script reads the leaderboard's create-only token from the event's registration
+link, https://aka.ms/aksctfsecrets, which points at a file in a secret gist: `leaderboard/setup.ps1` issues the token,
+and `leaderboard/publish.ps1` publishes it there, and checks the link.
+
+`setup` still writes `.lab/leaderboard/skillable-lca-windows.ps1`, a VM LCA with the token, for a profile that you
+can change before an event. Never commit it. Skillable runs it at First Displayable, which comes before an attendee
+is assigned to a running preinstance, so its `@lab.User` names can be wrong; and each new token means pasting it again.
 
 ## What the LCAs don't do
 

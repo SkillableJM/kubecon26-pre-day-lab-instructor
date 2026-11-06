@@ -5,7 +5,9 @@
 #
 # Don't paste this template: paste .lab/leaderboard/skillable-lca-linux.sh,
 # which leaderboard/setup.* writes with the event's submit URL (create-only
-# token) filled in. Lab profile > Life Cycle Actions > Add:
+# token) filled in. Not needed when attendees join from the lab instructions
+# (leaderboard/publish.*): this is the alternative, for a lab profile that you
+# can change. Lab profile > Life Cycle Actions > Add:
 #   Event: First Displayable   Action: Execute Script in Virtual Machine
 #   Language: Bash   Blocking: No   Error action: Ignore (the lab works
 #   without the leaderboard)

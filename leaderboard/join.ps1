@@ -4,8 +4,9 @@
 
 .DESCRIPTION
     Writes ~/.kubecon-ctf/leaderboard.env with the submit URL, a player ID and the name shown on the board;
-    scoring/verify.* then records every result on the leaderboard. On Skillable lab VMs the life cycle
-    action registers the lab instead (leaderboard/README.md).
+    scoring/verify.* then records every result on the leaderboard. It takes the submit URL from
+    .lab/leaderboard/submit-url.txt, for a quick test on your own machine. Attendees join with the lab repository's
+    scoring/join-leaderboard.ps1 instead, which reads it from the registration link (leaderboard/README.md).
 
 .EXAMPLE
     ./leaderboard/join.ps1 -Name 'Brian B.'                     # submit URL from .lab/leaderboard/submit-url.txt

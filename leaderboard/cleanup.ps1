@@ -7,6 +7,7 @@
     results, the leaderboard keeps showing what is there. Run leaderboard/setup.ps1 to issue a new token.
     Default: revokes the tokens, deletes the leaderboard's resource group (storage account and every result) and
     the local files in .lab/leaderboard/. Only resource groups created by leaderboard/setup are deleted.
+    Both close the registration link (leaderboard/publish.ps1 -Close), when this machine published one.
 
 .EXAMPLE
     ./leaderboard/cleanup.ps1 -RevokeOnly
@@ -50,8 +51,14 @@ $revoked = ($LASTEXITCODE -eq 0)
 if ($revoked) { Write-Host 'OK - tokens revoked: lab VMs can no longer record results.' -ForegroundColor Green }
 elseif ($RevokeOnly) { throw "Could not revoke the tokens for $StorageAccount" }
 else { Write-Warning 'Could not revoke the tokens (continuing with the deletion)' }
+# The registration link's gist (leaderboard/publish.ps1): new joins are told that no leaderboard is open.
+if (Test-Path (Join-Path $outDir 'gist.env')) {
+    Write-Host 'Closing the registration link ...'
+    try { & (Join-Path $PSScriptRoot 'publish.ps1') -Close -WaitMinutes 0 }
+    catch { Write-Warning "Could not close the registration link's gist: $($_.Exception.Message) Run ./leaderboard/publish.ps1 -Close." }
+}
 if ($RevokeOnly) {
-    Write-Host 'To accept results again: ./leaderboard/setup.ps1 (new token), then update the Skillable life cycle action.'
+    Write-Host 'To accept results again: ./leaderboard/setup.ps1 (new token), then ./leaderboard/publish.ps1.'
     return
 }
 
@@ -76,3 +83,6 @@ foreach ($f in 'settings.env', 'submit-url.txt', 'skillable-lca-windows.ps1', 's
     Remove-Item -Recurse -Force -ErrorAction SilentlyContinue (Join-Path $outDir $f)
 }
 Write-Host "Removed the local files in $outDir."
+if (Test-Path (Join-Path $outDir 'gist.env')) {
+    Write-Host 'Kept gist.env (no token in it): the next event''s publish updates the same gist, behind the same registration link.'
+}

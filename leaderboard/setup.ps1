@@ -12,12 +12,13 @@
         read the results for the leaderboard).
     Then it issues a create-only token (a user delegation SAS signed with your Microsoft Entra ID, valid for
     at most 7 days) and tests it. Re-run the script to issue a fresh token - for example the day before the
-    event - and update the Skillable life cycle action with it.
+    event - and open it to attendees with leaderboard/publish.ps1.
 
     Written to .lab/leaderboard/ (ignored by git - never commit the token):
       settings.env                storage account and container (read by board.* and cleanup.*)
-      submit-url.txt              the submit URL, token included
-      skillable-lca-windows.ps1   Skillable life cycle action for a Windows lab VM, token included
+      submit-url.txt              the submit URL, token included (read by publish.*)
+      skillable-lca-windows.ps1   a Skillable life cycle action for a Windows lab VM, token included: an
+                                  alternative to publish.*, for a lab profile that you can change
       skillable-lca-linux.sh      the same for a Linux lab VM
     See leaderboard/README.md.
 
@@ -185,7 +186,7 @@ Write-Info "Submit URL      : $(Join-Path $outDir 'submit-url.txt')"
 if ($ShowToken) { Write-Info "                  $submitUrl" }
 Write-Info ''
 Write-Info 'Next:'
-Write-Info "  Skillable   : add $(Join-Path $outDir 'skillable-lca-windows.ps1') as a life cycle action (leaderboard/README.md)"
+Write-Info '  Attendees   : ./leaderboard/publish.ps1    (the secret gist behind https://aka.ms/aksctfsecrets: they join from the lab instructions)'
 Write-Info "  Try it      : ./leaderboard/join.ps1 -Name 'Your N.'   then, in the lab repository,   ./scoring/verify.ps1 -Challenges c1"
 Write-Info '  Projector   : ./leaderboard/board.ps1'
 Write-Info '  Kill switch : ./leaderboard/cleanup.ps1 -RevokeOnly    (invalidates every token at once)'

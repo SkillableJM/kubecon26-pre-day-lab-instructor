@@ -120,3 +120,26 @@ Event leaderboard (2026-11-03, [leaderboard/README.md](../leaderboard/README.md)
   unchanged. `tests/leaderboard/simulate-players.ps1` posted 12 demo players (65 records, no failures);
   `board.ps1` and `board.sh` produced identical data (79 records, 16 players) and the board ranked them correctly;
   demo records were then removed with `az storage blob delete-batch --auth-mode login`.
+
+Leaderboard registration without a life cycle action (2026-11-05, `publish.*` here, `scoring/join-leaderboard.*` in the
+lab repository), on a throwaway leaderboard in CloudNative (westus3) with secret gists in the organizer's account, deleted
+afterwards:
+
+* **Static:** PowerShell parser; `bash -n`; shellcheck 0.11 clean on `join-leaderboard.sh`, `publish.sh`, `cleanup.sh`,
+  and `setup.sh`. Offline checks of both join scripts: an address that isn't Azure Storage, a token with more than create
+  (`sp=racwdl`), an expired token, unreplaced Skillable tokens with no terminal to ask, a name without letters, a long
+  player ID, a non-https link, an unreachable account, an option without a value: each refused with its message and
+  exit code, and nothing written.
+* **Publish:** the first run created a secret gist (`public: false`, one file); the link check passed for the gist's file
+  and its page, and reported "isn't set up yet" for https://aka.ms/aksctfsecrets (aka.ms sends unknown links to a Bing
+  search page) and "doesn't serve the gist's file" for an unrelated site. `publish.sh` updated the same gist (from
+  `gist.env`), created a new one when there was none, and refused a public gist. **Caching:** after a new token, every
+  address of the gist's file served the old one for about 4 minutes (`max-age=300`), and with a unique query string the
+  new one within 10 seconds; the scripts use that, and `publish` confirmed the new token through the link in 4 seconds.
+* **Join and report:** `join-leaderboard.ps1` with Skillable-style names wrote "Zoë O." (accents and apostrophe), kept
+  the player ID on a second join from the gist's page, and `scoring/lib/Leaderboard.ps1` recorded a flag and progress
+  that `board.ps1 -Once` showed under that name; the join probes in `health/` weren't on the board. In Git Bash,
+  `join-leaderboard.sh` wrote "Søren K.", and `scoring/lib/leaderboard.sh` recorded a flag.
+* **Kill switch and cleanup:** `cleanup.ps1 -RevokeOnly` revoked the tokens and closed the gist: a new join said "No
+  leaderboard is open". The revoked token still worked for about 16 seconds, then got 403 `AuthenticationFailed`.
+  `cleanup.sh -y` closed the gist again with `publish.sh`, deleted the resource group, and kept only `gist.env`.

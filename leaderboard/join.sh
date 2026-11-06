@@ -3,8 +3,9 @@
 # KubeCon AKS capture-the-flag lab - register this machine for the event
 # leaderboard (outside Skillable). Writes ~/.kubecon-ctf/leaderboard.env with
 # the submit URL, a player ID and the name shown on the board; scoring/verify.*
-# then records every result. On Skillable lab VMs the life cycle action
-# registers the lab instead (leaderboard/README.md).
+# then records every result. It takes the submit URL from setup's files, for a
+# quick test; attendees join with the lab repository's
+# scoring/join-leaderboard.sh, through the registration link (README.md).
 #
 #   ./leaderboard/join.sh --name "Brian B."      # submit URL from .lab/leaderboard/submit-url.txt
 #   ./leaderboard/join.sh --name "Team Kube" --url 'https://<account>.blob.core.windows.net/ctf?<token>'
@@ -20,7 +21,7 @@ ID=""
 REMOVE=false
 
 usage() {
-  sed -n '3,11p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '3,12p' "$0" | sed 's/^# \{0,1\}//'
   cat <<EOF
 Options:
   --name NAME   name shown on the leaderboard: letters, digits, spaces and . ' - (24 characters at most)

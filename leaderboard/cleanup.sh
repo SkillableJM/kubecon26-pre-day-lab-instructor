@@ -7,7 +7,9 @@
 # there. Run leaderboard/setup.sh to issue a new token.
 # Default: revokes the tokens, deletes the leaderboard's resource group (storage
 # account and every result) and the local files in .lab/leaderboard/. Only
-# resource groups created by leaderboard/setup are deleted.
+# resource groups created by leaderboard/setup are deleted. Both close the
+# registration link (leaderboard/publish.sh --close), when this machine
+# published one.
 #
 #   ./leaderboard/cleanup.sh --revoke-only
 #   ./leaderboard/cleanup.sh                  # asks for confirmation
@@ -24,7 +26,7 @@ REVOKE_ONLY=false
 YES=false
 
 usage() {
-  sed -n '3,13p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '3,15p' "$0" | sed 's/^# \{0,1\}//'
   cat <<EOF
 Options:
   -g, --resource-group NAME  default: from .lab/leaderboard/settings.env
@@ -67,8 +69,14 @@ elif [ "$REVOKE_ONLY" = true ]; then
 else
   echo "WARNING: could not revoke the tokens (continuing with the deletion)" >&2
 fi
+# The registration link's gist (leaderboard/publish.sh): new joins are told that no leaderboard is open.
+if [ -f "$OUT_DIR/gist.env" ]; then
+  echo "Closing the registration link ..."
+  bash "$SCRIPT_DIR/publish.sh" --close --wait 0 \
+    || echo "WARNING: could not close the registration link's gist. Run ./leaderboard/publish.sh --close." >&2
+fi
 if [ "$REVOKE_ONLY" = true ]; then
-  echo "To accept results again: ./leaderboard/setup.sh (new token), then update the Skillable life cycle action."
+  echo "To accept results again: ./leaderboard/setup.sh (new token), then ./leaderboard/publish.sh."
   exit 0
 fi
 
@@ -97,3 +105,6 @@ fi
 rm -rf "$OUT_DIR/settings.env" "$OUT_DIR/submit-url.txt" "$OUT_DIR/skillable-lca-windows.ps1" \
   "$OUT_DIR/skillable-lca-linux.sh" "$OUT_DIR/board"
 echo "Removed the local files in $OUT_DIR."
+if [ -f "$OUT_DIR/gist.env" ]; then
+  echo "Kept gist.env (no token in it): the next event's publish updates the same gist, behind the same registration link."
+fi

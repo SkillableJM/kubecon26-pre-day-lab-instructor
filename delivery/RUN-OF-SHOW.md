@@ -58,8 +58,8 @@ round start the next one with everyone else, and can come back to it later.
 - GitHub Copilot is optional. Attendees sign in to it through the lab's GitHub single sign-on (Skillable Events), in
   **Get started**, Task 3. It has the AKS-MCP server for their cluster. AI drafts, you verify.
 - Reset: one command per challenge, 2 to 5 minutes, no confirmation, only the challenge you're working on.
-- If the event has a leaderboard: each check records the attendee's first name and last initial; `-NoReport` keeps a
-  run off the board.
+- If the event has a leaderboard: joining is optional, with one command in **Get started**, Task 6. Each check then
+  records the attendee's first name and last initial; `-NoReport` keeps a run off the board.
 
 ## Checklists
 
@@ -80,13 +80,14 @@ round start the next one with everyone else, and can come back to it later.
 - [ ] Preinstances requested: running, with at least 45 minutes of lead time, for the expected attendance plus
       spares.
 - [ ] Proctor dry run: each proctor solves C1, C2, A2, C4, and C3 in a test launch, with the proctor guide.
-- [ ] The leaderboard, if used: [set it up, and rehearse it](../leaderboard/README.md#before-the-event).
+- [ ] The leaderboard, if used: [set it up, and rehearse it](../leaderboard/README.md#before-the-event), and point
+      https://aka.ms/aksctfsecrets at its secret gist (once: `publish` prints the address and checks the link).
 
 ### The day before
 
 - [ ] A final test launch from the event's lab profile: the setup log, a check, a reset.
-- [ ] The leaderboard's token issued for the event (`setup`), and its life cycle action pasted into the lab profile
-      again.
+- [ ] The leaderboard's token issued for the event (`setup`, valid at least until the event ends) and published
+      (`publish`: it reports that https://aka.ms/aksctfsecrets serves it). Nothing changes in the lab profile.
 - [ ] Optional, for debriefs: your own environment with the begin state, and another with the
       [end state](../challenge-end-state/README.md), to show broken and fixed side by side.
 - [ ] The slides: the welcome, one brief and one debrief per round, and the wrap-up.
@@ -100,7 +101,7 @@ round start the next one with everyone else, and can come back to it later.
 
 ### After the event
 
-- [ ] Announce the winners; then delete the leaderboard with `cleanup`.
+- [ ] Announce the winners; then delete the leaderboard with `cleanup`, which also closes the registration link.
 - [ ] Check with Skillable that every lab instance and its resources are gone.
 - [ ] Delete your debrief environments.
 - [ ] Note what went wrong, and what attendees found hard, in this repository, for the next delivery.
@@ -117,3 +118,4 @@ round start the next one with everyone else, and can come back to it later.
 | A round runs long | Shorten its debrief. If you're more than 10 minutes behind, make round 4 an easier challenge (A3 or A6). |
 | Orders hang in C1, C2, or C4 after a correct fix | `kubectl rollout restart deployment/order-service -n <namespace>` (the proctor guide's known problems). |
 | The leaderboard records junk or an offensive name | Double-click the player to hide them, or delete their records ([moderation](../leaderboard/README.md#during-the-event)). To stop all submissions: `cleanup -RevokeOnly`. |
+| An attendee's leaderboard join says that its link isn't set up, no leaderboard is open, or it didn't accept a test entry | The leaderboard operator runs `publish` again: it checks the link, and says what's wrong. Then the attendee runs the join command again. Their checks work the same either way. |

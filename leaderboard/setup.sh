@@ -8,11 +8,13 @@
 # after --retention-days), a container for the event, and "Storage Blob Data
 # Contributor" on the account for you. Then issues a create-only token (user
 # delegation SAS signed with your Microsoft Entra ID, at most 7 days) and tests
-# it. Re-run to issue a fresh token, e.g. the day before the event.
+# it. Re-run to issue a fresh token, e.g. the day before the event, and open it
+# to attendees with leaderboard/publish.sh.
 #
 # Writes .lab/leaderboard/ (ignored by git - never commit the token):
-# settings.env, submit-url.txt and the Skillable life cycle actions with the
-# token filled in. See leaderboard/README.md.
+# settings.env, submit-url.txt (read by publish.sh), and Skillable life cycle
+# actions with the token filled in (an alternative to publish.sh, for a lab
+# profile that you can change). See leaderboard/README.md.
 #
 #   ./leaderboard/setup.sh
 #   ./leaderboard/setup.sh -g rg-ctf-leaderboard --container kubecon-na-2026 --hours 36
@@ -42,7 +44,7 @@ PURPOSE=kubecon-ctf-leaderboard
 OUT_DIR="$REPO_ROOT/.lab/leaderboard"
 
 usage() {
-  sed -n '3,18p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '3,20p' "$0" | sed 's/^# \{0,1\}//'
   cat <<EOF
 Options:
   -g, --resource-group NAME  resource group (default: $RESOURCE_GROUP)
@@ -183,7 +185,7 @@ log_info "Submit URL      : $OUT_DIR/submit-url.txt"
 if [ "$SHOW_TOKEN" = true ]; then log_info "                  $SUBMIT_URL"; fi
 log_info ""
 log_info "Next:"
-log_info "  Skillable   : add $OUT_DIR/skillable-lca-windows.ps1 as a life cycle action (leaderboard/README.md)"
+log_info "  Attendees   : ./leaderboard/publish.sh    (the secret gist behind https://aka.ms/aksctfsecrets: they join from the lab instructions)"
 log_info "  Try it      : ./leaderboard/join.sh --name 'Your N.'   then, in the lab repository,   scoring/verify.sh --challenges c1"
 log_info "  Projector   : ./leaderboard/board.sh"
 log_info "  Kill switch : ./leaderboard/cleanup.sh --revoke-only    (invalidates every token at once)"

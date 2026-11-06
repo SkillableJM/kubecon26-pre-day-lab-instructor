@@ -63,7 +63,7 @@ that start with `challenge-end-state/`, which are in this repository.
 challenge-end-state/        the challenges solved: deploy scripts (bash, PowerShell, Terraform) and, per challenge,
   challenges/<id>-*/        SOLUTION.md (walkthrough), README.md (what changes), and the solved manifests/
 delivery/                   RUN-OF-SHOW.md and PROCTOR-GUIDE.md, for the day of delivery
-leaderboard/                the optional projected leaderboard: setup, board, cleanup, and its Skillable LCA
+leaderboard/                the optional projected leaderboard: setup, publish (the token for attendees), board, cleanup
 skillable/                  runbooks for the Skillable deployment (the scripts are in the lab repository)
 docs/testing.md             how the lab was tested: static checks, kind, Azure
 docs/participant-permissions.md   what each challenge needs an attendee to be allowed to do
