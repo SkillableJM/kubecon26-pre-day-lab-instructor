@@ -143,3 +143,18 @@ afterwards:
 * **Kill switch and cleanup:** `cleanup.ps1 -RevokeOnly` revoked the tokens and closed the gist: a new join said "No
   leaderboard is open". The revoked token still worked for about 16 seconds, then got 403 `AuthenticationFailed`.
   `cleanup.sh -y` closed the gist again with `publish.sh`, deleted the resource group, and kept only `gist.env`.
+
+Leaderboard columns (2026-11-06). In a test of the lab, the board ran with the README's event-day command at the time,
+`-Challenges c1,c2,a2,c4 -Start '2026-11-10 09:00'`: three passing C3 checks were in the data, but the page showed
+only those four columns, and every time as `+0:00` (the start was four days ahead). The page now gives any of the ten
+challenges with a result a column, and shows captures before the start as their clock time; the commands in the README
+and the run of show show all ten. Tested with `node --check`, and in headless Edge:
+
+* **That test's `board-data.js`** (the same command): the earlier page showed C1, C2, A2, C4, 2 flags, `+0:00`; the new
+  page adds C3, with 3 flags and the clock times of the captures.
+* **Ten columns:** 14 demo players with flags and progress in all ten challenges, including "Maximilian-Alexander W.",
+  at 1920 x 1080 and 1280 x 720: every column fits, with room for names of 24 characters (the fixed table layout ends a
+  longer name with an ellipsis instead of pushing the columns off the screen); about 11 rows fit before the page scrolls.
+* **Edge cases** (rendered DOM): an unlisted A3 with a flag adds an A3 column that counts; an unlisted C4 with only
+  progress adds a C4 column; records for `c9` add nothing and count for nothing; a duplicated or mixed-case list
+  (`c1,c1,C2`) gives C1 and C2 once; an empty list gives all ten.

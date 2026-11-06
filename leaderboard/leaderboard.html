@@ -30,19 +30,25 @@
   #banner { display: none; background: #3a1d1d; color: #ffd6d6; border: 1px solid var(--red);
     border-radius: 0.3em; padding: 0.35em 0.7em; margin-bottom: 0.6em; font-size: 0.8em; }
   main { flex: 1; }
-  table { width: 100%; border-collapse: separate; border-spacing: 0 0.22em; }
+  /* Fixed layout: the column widths come from the colgroup, and long names end in an ellipsis instead of
+     pushing ten challenge columns off the screen. */
+  table { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 0 0.22em; }
+  col.rank { width: 2.6em; }
+  col.cell { width: 3.9em; }
+  col.flags { width: 3.4em; }
+  col.last { width: 4.9em; }
   th { color: var(--dim); font-weight: 600; font-size: 0.75em; text-align: center; padding: 0 0.3em 0.2em; }
   th.player, td.player { text-align: left; }
   th .solves { display: block; font-weight: 400; font-size: 0.85em; color: var(--dim); }
   td { background: var(--panel); padding: 0.32em 0.4em; text-align: center; white-space: nowrap; }
   tr td:first-child { border-radius: 0.35em 0 0 0.35em; }
   tr td:last-child { border-radius: 0 0.35em 0.35em 0; }
-  td.rank { width: 3.2em; font-weight: 700; color: var(--dim); }
-  td.player { font-weight: 600; max-width: 14em; overflow: hidden; text-overflow: ellipsis; }
-  td.flags { font-size: 1.25em; font-weight: 800; color: var(--green); width: 3em; }
+  td.rank { font-weight: 700; color: var(--dim); }
+  td.player { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+  td.flags { font-size: 1.25em; font-weight: 800; color: var(--green); }
   td.flags.zero { color: var(--dim); }
-  td.last { color: var(--dim); font-size: 0.8em; width: 5.5em; }
-  td.cell { width: 4.6em; font-size: 0.95em; }
+  td.last { color: var(--dim); font-size: 0.8em; }
+  td.cell { font-size: 0.95em; }
   td.cap { color: var(--green); font-weight: 700; }
   td.cap small, td.first small { display: block; font-weight: 400; font-size: 0.6em; color: var(--dim); }
   td.first { color: var(--gold); font-weight: 800; box-shadow: inset 0 0 0 2px var(--gold); }
@@ -65,6 +71,7 @@
 <div id="banner"></div>
 <main>
   <table id="board" hidden>
+    <colgroup id="cols"></colgroup>
     <thead><tr id="head"></tr></thead>
     <tbody id="rows"></tbody>
   </table>
@@ -72,8 +79,8 @@
   <div id="empty" hidden></div>
 </main>
 <footer>
-  <span>Solved a challenge? Run <code>scoring/verify.sh --challenges &lt;id&gt;</code> or
-    <code>./scoring/verify.ps1 -Challenges &lt;id&gt;</code> &ndash; your flag shows up here within seconds.</span>
+  <span>To play, join from the lab instructions (<b>Get started</b>, Task 6). Your checks show up here within
+    seconds; <code>-Quick</code> checks don't count.</span>
   <span id="hint"></span>
 </footer>
 <script>
@@ -122,17 +129,26 @@
   var start = D.start ? Date.parse(D.start) : NaN;
   function when(t) {
     if (!isFinite(t)) { return ''; }
-    if (!isNaN(start)) {
-      var s = Math.max(0, Math.round((t - start) / 1000));
+    // Time since the start; a capture before the start (a rehearsal, an early bird) shows its clock time.
+    if (!isNaN(start) && t >= start) {
+      var s = Math.round((t - start) / 1000);
       var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
       return '+' + (h ? h + ':' + String(m).padStart(2, '0') : String(m)) + ':' + String(sec).padStart(2, '0');
     }
     return new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  var challenges = (Array.isArray(D.challenges) ? D.challenges : [])
-    .map(function (c) { return String(c).toLowerCase(); })
-    .filter(function (c) { return /^[ac][0-9]$/.test(c); });
+  // The lab's challenges. The board script lists the ones that get a column from the start, in order (all ten by
+  // default). A challenge that isn't listed gets a column at the end once someone records a result for it, so a
+  // captured flag is never hidden. Other IDs in the records are ignored.
+  var KNOWN = ['c1', 'c2', 'c3', 'c4', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6'];
+  var listed = [];
+  (Array.isArray(D.challenges) ? D.challenges : []).forEach(function (c) {
+    c = String(c).toLowerCase();
+    if (/^[ac][0-9]$/.test(c) && listed.indexOf(c) < 0) { listed.push(c); }
+  });
+  if (!listed.length) { listed = KNOWN.slice(); }
+  var seen = {};
 
   // One record per challenge and verify run: results/<player-id>/<challenge>/<timestamp>.json, with the
   // display name (base64), pass/fail and checks in the metadata. A challenge's flag is captured at the
@@ -141,9 +157,10 @@
   D.entries.forEach(function (e) {
     if (!e || typeof e.n !== 'string') { return; }
     var m = /^results\/([A-Za-z0-9._-]{1,64})\/([ac][0-9])\/[^\/]{1,100}$/.exec(e.n);
-    if (!m || challenges.indexOf(m[2]) < 0) { return; }
+    if (!m || (listed.indexOf(m[2]) < 0 && KNOWN.indexOf(m[2]) < 0)) { return; }
     var t = Date.parse(e.t);
     if (isNaN(t)) { return; }
+    seen[m[2]] = true;
     var md = e.m || {};
     var p = players.get(m[1]);
     if (!p) { p = { id: m[1], name: '', nameAt: -1, caps: {}, latest: {} }; players.set(m[1], p); }
@@ -159,6 +176,7 @@
     p.last = times.length ? Math.max.apply(null, times) : Infinity;
     if (!p.name) { p.name = 'Player ' + p.id.slice(-4); }
   });
+  var challenges = listed.concat(KNOWN.filter(function (c) { return seen[c] && listed.indexOf(c) < 0; }));
 
   var hidden = loadHidden();
   var maxRows = Math.min(200, Math.max(5, Number(D.maxRows) || 20));
@@ -180,6 +198,14 @@
     stats.appendChild(document.createTextNode(visible.length === 1 ? ' player \u00b7 ' : ' players \u00b7 '));
     stats.appendChild(el('b', null, String(totalFlags)));
     stats.appendChild(document.createTextNode(' flags \u00b7 updated ' + clock(Date.parse(D.generated))));
+
+    var cols = $('cols');
+    cols.textContent = '';
+    cols.appendChild(el('col', 'rank'));
+    cols.appendChild(el('col', 'player'));
+    challenges.forEach(function () { cols.appendChild(el('col', 'cell')); });
+    cols.appendChild(el('col', 'flags'));
+    cols.appendChild(el('col', 'last'));
 
     var head = $('head');
     head.textContent = '';

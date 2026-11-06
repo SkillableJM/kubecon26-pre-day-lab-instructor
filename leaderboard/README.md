@@ -209,17 +209,23 @@ check the name that it shows.
 ## During the event
 
 ```powershell
-./leaderboard/board.ps1 -Challenges c1,c2,a2,c4 -Title 'KubeCon NA 2026 - AKS Capture the Flag' -Start '2026-11-10 09:00'
+./leaderboard/board.ps1 -Title 'KubeCon NA 2026 - AKS Capture the Flag' -Start '2026-11-10 09:00'
 ```
 
 ```bash
-./leaderboard/board.sh --challenges c1,c2,a2,c4 --title 'KubeCon NA 2026 - AKS Capture the Flag' --start 2026-11-10T09:00
+./leaderboard/board.sh --title 'KubeCon NA 2026 - AKS Capture the Flag' --start 2026-11-10T09:00
 ```
 
 The script reads the results every 10 seconds (`-RefreshSeconds` / `--refresh`) and opens the page; press **F11** for
-full screen. `-Challenges` sets the columns and what counts (default: all ten), `-Start` shows capture times as time
-since the start, `-MaxRows` / `--max-rows` the number of players shown (default 20). If the script stops or can't read
-the results, the page says so.
+full screen. The board shows all ten challenges, C1 to C4 and then A1 to A6, and every flag counts, so attendees who
+finish a round early and try an alternate get credit for it. `-Challenges` / `--challenges` sets the challenges that
+get a column from the start, and their order; any other challenge gets a column at the end as soon as someone records
+a result for it, so the board never hides a flag. `-Start` shows capture times as time since the start, and captures
+before it as their clock time: leave it out while you test before the event. `-MaxRows` / `--max-rows` sets the number
+of players shown (default 20; about 11 rows fit on a 16:9 screen, such as 1920 x 1080 or 1280 x 720, and the page
+scrolls for more). If the script
+stops or can't read the results, the page says so. Restart the script to pick up a new version of the page: it copies
+`leaderboard.html` when it starts.
 
 **Scoring.** A flag is captured the first time `verify` passes a challenge – a later failing run doesn't take it away.
 Players rank by flags, then by who reached that number first (server time). ★ marks the first player to capture each

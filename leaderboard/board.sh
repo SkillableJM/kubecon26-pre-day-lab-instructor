@@ -10,7 +10,7 @@
 # Stop with Ctrl+C. See leaderboard/README.md.
 #
 #   ./leaderboard/board.sh            # storage account/container/subscription from .lab/leaderboard/settings.env
-#   ./leaderboard/board.sh --account ctflb1a2b3c4d --container ctf --challenges c1,c2,a2,c4 --start 2026-11-10T09:00
+#   ./leaderboard/board.sh --title 'KubeCon NA 2026 - AKS Capture the Flag' --start 2026-11-10T09:00
 # -----------------------------------------------------------------------------
 set -uo pipefail
 export MSYS_NO_PATHCONV=1 MSYS2_ARG_CONV_EXCL="*"
@@ -38,11 +38,13 @@ Options:
   --container NAME      container (default: from .lab/leaderboard/settings.env)
   --subscription ID     subscription of the storage account (default: from .lab/leaderboard/settings.env,
                         else the Azure CLI default) - needed when your default is in another tenant
-  --challenges LIST     challenges shown and scored, in column order (default: $CHALLENGES)
+  --challenges LIST     challenges that get a column from the start, in this order (default: all ten); any
+                        other challenge gets a column at the end when someone records a result for it
   --title TEXT          heading (default: $TITLE)
   --refresh SECONDS     refresh interval, 5-300 (default: $REFRESH)
   --max-rows N          players shown, 5-200 (default: $MAX_ROWS)
-  --start TIME          event start, e.g. 2026-11-10T09:00 (local): capture times shown as time since the start
+  --start TIME          event start, e.g. 2026-11-10T09:00 (local): capture times shown as time since the start,
+                        and earlier captures as their clock time; leave it out while you test
   --out-dir DIR         where the page and its data are written (default: .lab/leaderboard/board)
   --once                write the data once and exit
   --no-browser          don't open the browser

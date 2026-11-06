@@ -94,8 +94,8 @@ round start the next one with everyone else, and can come back to it later.
 
 ### On the day, before doors open
 
-- [ ] The projector laptop: the slides, the leaderboard (`board.ps1 -Challenges c1,c2,a2,c4`), and a terminal on
-      your debrief environment.
+- [ ] The projector laptop: the slides, the leaderboard (`board.ps1 -Title '<event title>' -Start '<the event's start>'`:
+      all ten challenges), and a terminal on your debrief environment.
 - [ ] Preinstances running, and spares available. Everyone knows how to move an attendee to a spare.
 - [ ] Proctors have the proctor guide open on their own devices.
 

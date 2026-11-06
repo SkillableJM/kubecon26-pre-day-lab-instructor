@@ -12,7 +12,9 @@
 .EXAMPLE
     ./leaderboard/board.ps1                     # storage account, container and subscription from .lab/leaderboard/settings.env
 .EXAMPLE
-    ./leaderboard/board.ps1 -StorageAccount ctflb1a2b3c4d -Container ctf -Challenges c1,c2,a2,c4 -Title 'KubeCon NA 2026 - AKS CTF' -Start '2026-11-10 09:00'
+    ./leaderboard/board.ps1 -Title 'KubeCon NA 2026 - AKS Capture the Flag' -Start '2026-11-10 09:00'
+.EXAMPLE
+    ./leaderboard/board.ps1 -StorageAccount ctflb1a2b3c4d -Container ctf      # on a laptop that didn't run setup
 #>
 #Requires -Version 7.4
 [CmdletBinding()]
@@ -22,12 +24,14 @@ param(
     # Subscription of the storage account (default: the one recorded by setup, else the Azure CLI default).
     # Needed when your Azure CLI default subscription is in another tenant.
     [string]$Subscription,
-    # Challenges shown and scored, in column order.
+    # The challenges that get a column from the start, in this order (default: all ten). Any other challenge gets a
+    # column at the end as soon as someone records a result for it, so the board never hides a flag.
     [string[]]$Challenges = @('c1', 'c2', 'c3', 'c4', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6'),
     [string]$Title = 'KubeCon AKS Capture the Flag',
     [ValidateRange(5, 300)][int]$RefreshSeconds = 10,
     [ValidateRange(5, 200)][int]$MaxRows = 20,
-    # Event start in local time (for example '2026-11-10 09:00'): capture times are shown as time since the start.
+    # Event start in local time (for example '2026-11-10 09:00'): capture times are shown as time since the start, and
+    # captures before it as their clock time. Leave it out while you test before the event.
     [string]$Start,
     # Where the page and its data are written (default: .lab/leaderboard/board).
     [string]$OutDir,
