@@ -74,7 +74,8 @@ round start the next one with everyone else, and can come back to it later.
       from the same commit. Tag the commit for the event (such as `v1.0.0`), and set the prepare LCA's `RepoRef` to
       the tag (a pool admin saves it: [the LCA runbook](../skillable/LCA-RUNBOOK.md)).
 - [ ] The VM image is built from the current image script, and captured ([the VM image runbook](../skillable/VM-IMAGE-RUNBOOK.md)).
-- [ ] A test launch passes the readiness gate; `verify.ps1 -Challenges c1 -Quick -NoReport` shows **NOT PASSED**;
+- [ ] A test launch's setup log passes ([Logs and results](../skillable/LCA-RUNBOOK.md#logs-and-results));
+      `verify.ps1 -Challenges c1 -Quick -NoReport` shows **NOT PASSED**;
       a reset of C1 works as the attendee.
 - [ ] Preinstances requested: running, with at least 45 minutes of lead time, for the expected attendance plus
       spares.
@@ -83,7 +84,7 @@ round start the next one with everyone else, and can come back to it later.
 
 ### The day before
 
-- [ ] A final test launch from the event's lab profile: readiness gate, a check, a reset.
+- [ ] A final test launch from the event's lab profile: the setup log, a check, a reset.
 - [ ] The leaderboard's token issued for the event (`setup`), and its life cycle action pasted into the lab profile
       again.
 - [ ] Optional, for debriefs: your own environment with the begin state, and another with the
@@ -108,7 +109,7 @@ round start the next one with everyone else, and can come back to it later.
 
 | Situation | Do |
 | --- | --- |
-| An attendee's environment doesn't work, or the readiness gate failed | Move them to a spare. Don't debug the platform during a round. |
+| An attendee's environment doesn't work | Move them to a spare. Don't debug the platform during a round. For later, the VM's setup log has the step that failed: in VS Code, the newest `.lab\skillable\begin-state-<time>.log` in the lab repository. |
 | An attendee is stuck in a strange state | The challenge's reset, from **Check your work, or start over** (2 to 5 minutes). |
 | C4 fails for the whole room (no model access) | Run A4 as round 4. |
 | Most of the room is stuck at the same point | Tell everyone to open the next hint, or give the clue from the proctor guide's **When to nudge** row. |

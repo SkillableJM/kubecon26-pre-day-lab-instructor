@@ -102,8 +102,9 @@ leaderboard there and replaces the local files of the old one.
 
 In the lab profile: **Life Cycle Actions → Add**
 
-* Event **Running**, action **Execute Script in Virtual Machine**, language **PowerShell** (Windows VM) or **Bash**
-  (Linux VM), **Blocking: No**, **Error action: Ignore** – the lab works without the leaderboard.
+* Event **First Displayable**, action **Execute Script in Virtual Machine**, language **PowerShell** (Windows VM) or
+  **Bash** (Linux VM), **Blocking: No**, **Error action: Ignore** – the lab works without the leaderboard. (Skillable
+  runs scripts in a VM only at First Displayable, Saving, Resumed, and Tearing Down.)
 * Script: the contents of `.lab/leaderboard/skillable-lca-windows.ps1` (or `skillable-lca-linux.sh`) – not the
   templates in `leaderboard/skillable/`, which don't contain the token.
 
@@ -111,7 +112,9 @@ When a lab starts, Skillable replaces `@lab.User.Id`, `@lab.User.FirstName` and 
 writes `%ProgramData%\kubecon-ctf\leaderboard.env` (Linux: `/etc/kubecon-ctf/leaderboard.env`). The Skillable user ID
 keeps a player's flags when they relaunch the lab; use `@lab.LabInstance.GlobalId` instead if attendees share a
 Skillable account. **Each time you re-run `setup`, paste the new copy into the lab profile.** In the Skillable pilot,
-check one attendee whose name has accents.
+check one attendee whose name has accents. **With running preinstances, check the names too:** First Displayable
+runs when Skillable builds the preinstance, before it's assigned to an attendee, so `@lab.User` may not be the
+attendee yet. Look at `leaderboard.env` in a preinstance after it's assigned to you, before the event.
 
 Lab VMs need outbound HTTPS to `<account>.blob.core.windows.net`, and `curl` for `verify.sh` – no Azure role, no
 Azure CLI and no sign-in.

@@ -102,9 +102,9 @@ Then, from the lab repository's root, `./scoring/verify.ps1 -Context <cluster>`:
 
 Until 2026-11-04, the lab repository also had this repository's content, and its history on GitHub still does:
 anyone can open an earlier commit and read the solutions. The lab VMs are safe either way, because they get a shallow
-clone (one commit, no history), and their readiness gate fails if it finds solution content in the clone's files or
-history. To take the solutions out of the public history too, publish the lab repository again with a single,
-clean commit:
+clone (one commit, no history), and the prepare LCA's readiness checks fail if they find solution content in the
+clone's files or history. To take the solutions out of the public history too, publish the lab repository again
+with a single, clean commit:
 
 1. Optional: keep the old history in this private repository, from your clone of the lab repository:
    `git push <this repository's URL> main:archive/lab-repository-history`.

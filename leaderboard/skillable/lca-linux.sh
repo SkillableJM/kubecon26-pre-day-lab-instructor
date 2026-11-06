@@ -6,9 +6,12 @@
 # Don't paste this template: paste .lab/leaderboard/skillable-lca-linux.sh,
 # which leaderboard/setup.* writes with the event's submit URL (create-only
 # token) filled in. Lab profile > Life Cycle Actions > Add:
-#   Event: Running   Action: Execute Script in Virtual Machine   Language: Bash
-#   Blocking: No     Error action: Ignore (the lab works without the leaderboard)
-# Skillable replaces the @lab tokens when the lab starts. The token expires
+#   Event: First Displayable   Action: Execute Script in Virtual Machine
+#   Language: Bash   Blocking: No   Error action: Ignore (the lab works
+#   without the leaderboard)
+# Skillable replaces the @lab tokens when the lab starts. With running
+# preinstances, that's before an attendee is assigned: check the names
+# (leaderboard/README.md). The token expires
 # (7 days at most): after re-running setup, paste the new copy into the lab
 # profile. Writes /etc/kubecon-ctf/leaderboard.env (needs root; falls back to
 # ~/.kubecon-ctf/leaderboard.env).

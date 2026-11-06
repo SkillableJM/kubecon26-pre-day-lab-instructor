@@ -93,7 +93,7 @@ repository's commit) and setup logs to the same folder.
     favorites folder, and no pop-ups appear. Don't sign in to GitHub in VS Code.
 11. In a new elevated PowerShell window, run the following command. It verifies the image again; removes
     credentials, caches, history (including Linux shell history), the state of any LCA test run
-    (`C:\ProgramData\kubecon-ctf-lca`, its scheduled task, and the lab repository's `.lab` folder), and setup
+    (`C:\ProgramData\kubecon-ctf-lca`, its scheduled tasks, and the lab repository's `.lab` folder), and setup
     files, including `C:\LabSetup`; shuts down WSL; and shuts down the VM. Automatic sign-in and the integration
     service must pass now, so their rows show **FAIL** instead of **WARN** if they're missing, and nothing is
     removed. After the cleanup, it confirms that no Azure CLI sign-in, kubeconfig, GitHub CLI or Git credential,

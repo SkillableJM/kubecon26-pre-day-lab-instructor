@@ -37,7 +37,7 @@ debrief. Each challenge's SOLUTION.md has the full walkthrough, with the expecte
 | Orders hang hours after C1 was fixed (`POST /api/orders` returns HTTP 504), or a manual order fails in C2 or C4, while `/health` is green | The store's `order-service` doesn't reconnect when RabbitMQ is rescheduled (node upgrade, NAP consolidation) | `kubectl rollout restart deployment/order-service -n <namespace>`. It isn't the attendee's fault: if C1 passed before, it counts. |
 | A challenge is in a state you can't explain | The attendee experimented with it | Reset it, and start the challenge again. |
 | A check fails right after a correct fix, and passes when it runs again | Gateways, DNS, rollouts, and new nodes take a minute or two to settle. Seen once in testing: C2 at 8 of 9 checks right after its route was applied again, then 9 of 9. | Wait a minute, and run the check again before you debug. |
-| An environment doesn't work at all | The launch had a problem | Move the attendee to a spare environment. Don't debug the platform during a round. |
+| An environment doesn't work at all | The launch had a problem | Move the attendee to a spare environment. Don't debug the platform during a round. The VM's setup log, the newest `.lab\skillable\begin-state-<time>.log` in the lab repository in VS Code, has the step that failed, for later. |
 
 ---
 

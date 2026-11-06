@@ -5,9 +5,12 @@
 # Don't paste this template: paste .lab/leaderboard/skillable-lca-windows.ps1,
 # which leaderboard/setup.* writes with the event's submit URL (create-only
 # token) filled in. Lab profile > Life Cycle Actions > Add:
-#   Event: Running   Action: Execute Script in Virtual Machine   Language: PowerShell
-#   Blocking: No     Error action: Ignore (the lab works without the leaderboard)
-# Skillable replaces the @lab tokens when the lab starts. The token expires
+#   Event: First Displayable   Action: Execute Script in Virtual Machine
+#   Language: PowerShell   Blocking: No   Error action: Ignore (the lab
+#   works without the leaderboard)
+# Skillable replaces the @lab tokens when the lab starts. With running
+# preinstances, that's before an attendee is assigned: check the names
+# (leaderboard/README.md). The token expires
 # (7 days at most): after re-running setup, paste the new copy into the lab
 # profile. Runs on Windows PowerShell 5.1 and PowerShell 7.
 # -----------------------------------------------------------------------------
