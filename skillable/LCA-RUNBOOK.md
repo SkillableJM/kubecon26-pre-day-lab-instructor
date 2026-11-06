@@ -173,12 +173,14 @@ Each result ends with `Summary for troubleshooting: <the log's copy in .lab\skil
   Without the model quota, the begin state fails at C4: confirm it with Skillable, or leave `c4` out of `Challenges`.
 - **Preinstances:** the begin state takes 20 to 30 minutes (20 in testing, 18 of them in `deploy.ps1`), so use
   running preinstances with at least 45 minutes of lead time, plus spares.
-- **GitHub Copilot:** attendees sign in to GitHub in VS Code with an account that has a Copilot seat. If the
-  seats come from a GitHub organization or enterprise (Copilot Business or Enterprise), an owner must turn on the
-  **MCP servers in Copilot** policy, which is off by default: in the organization's **Settings** > **Copilot** >
-  **Policies**, set **MCP servers in Copilot** to **Enabled** (for an enterprise: **AI controls** > **MCP**).
-  Without it, Copilot can't use the AKS-MCP server that the image configures. Copilot Free and Pro accounts
-  don't have the policy.
+- **GitHub Copilot:** attendees sign in to GitHub through the Skillable Events enterprise's single sign-on
+  (`https://github.com/enterprises/skillable-events/sso`), and then to VS Code with **Continue with GitHub**: the lab
+  instructions' **Get started**, Task 3. That gives them Copilot and its models, without signing in to a GitHub
+  account of their own. For Copilot to use the AKS-MCP server that the image configures, the enterprise's **MCP
+  servers in Copilot** policy must be on (off by default; in an enterprise: **AI controls** > **MCP**). Confirm it
+  with Skillable, and test it in a launch: step 6 of [Test a launch](#test-a-launch). Outside this lab, Copilot
+  Free and Pro accounts don't have the policy, and organization seats need it on in the organization's
+  **Settings** > **Copilot** > **Policies**.
 
 ## Add the LCA in Skillable
 
@@ -262,9 +264,11 @@ The prepare LCA runs them at the end of each run, and writes them to its log ([L
    `Get-ChildItem C:\ -Recurse -Force -Filter SOLUTION.md -ErrorAction SilentlyContinue` finds nothing.
 5. Confirm that the service principal is gone: `C:\ProgramData\kubecon-ctf-lca\azure-cli` doesn't exist, and both
    **Cloud credentials removed** lines in the log passed, the readiness check and the cleanup task's last line.
-6. Confirm that Copilot can use AKS-MCP: the log's **AKS-MCP for Copilot** check passed. In the Copilot Chat view,
-   in **Agent** mode, select **Configure Tools**: **aks-mcp** and its tools are listed and stay selected (select
-   **Trust** if VS Code asks). Ask *Which pods in namespace c1-store aren't ready?*, and allow its tool call.
+6. Confirm that Copilot can use AKS-MCP: the log's **AKS-MCP for Copilot** check passed. Sign in to GitHub Copilot
+   as the lab instructions' **Get started**, Task 3, describes (the Skillable Events single sign-on, then **Sign In**
+   in VS Code). In the Copilot Chat view, in **Agent** mode, select **Configure Tools**: **aks-mcp** and its tools
+   are listed and stay selected (select **Trust** if VS Code asks). Ask *Which pods in namespace c1-store aren't
+   ready?*, and allow its tool call.
 
 ## Build the begin state by hand
 
@@ -302,8 +306,8 @@ instructors' repository in a lab VM that an attendee gets.
   Advanced Container Networking Services, so Hubble has nothing to connect to. The prepare LCA sets the same
   arguments at each launch, and its **AKS-MCP for Copilot** check starts the server. It runs as the attendee, with
   their `az login` and kubeconfig. VS Code asks the attendee to trust the server the first time it starts. The
-  **MCP servers in Copilot** policy must be on for organization or enterprise Copilot seats (see
-  [Before you start](#before-you-start)).
+  **MCP servers in Copilot** policy of the Skillable Events enterprise, which provides the attendees' Copilot, must
+  be on (see [Before you start](#before-you-start)).
 - **az aks agent**: the image installs the `aks-agent` extension. The agent needs a large language model: its
   `az aks agent-init` asks for an Azure OpenAI (or other) endpoint and key, and deploys the agent to the cluster
   (cluster mode), or runs it in Docker (client mode, which the lab VM doesn't have). The LCA doesn't configure a

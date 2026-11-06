@@ -25,7 +25,7 @@ an 8-minute debrief.
 
 | Starts | Minutes | Block | Notes |
 | --- | --- | --- | --- |
-| 0:00 | 15 | Welcome, and access to the environments | The welcome talk below. Everyone completes the lab instructions' **Get started** page: portal sign-in, `az login`, `kubectl get nodes`. Proctors move anyone who can't to a spare now. |
+| 0:00 | 15 | Welcome, and access to the environments | The welcome talk below. Everyone completes the lab instructions' **Get started** page: the VM and portal sign-ins, `az login`, GitHub single sign-on for Copilot, `kubectl get nodes`. Proctors move anyone who can't reach the cluster to a spare now. |
 | 0:15 | 33 | **Round 1: C1**, The store won't start | Brief 5, work 20, debrief 8. A warm-up: logs, ConfigMaps, rollouts. |
 | 0:48 | 38 | **Round 2: C2**, Move the storefront to Gateway API | Brief 5, work 25, debrief 8. Mention Copilot and AKS-MCP in the brief. |
 | 1:26 | 10 | Break | Fast finishers can try C3. |
@@ -55,8 +55,8 @@ round start the next one with everyone else, and can come back to it later.
 - Hints are on each challenge page: try for a few minutes first. Proctors help with questions, not answers.
 - Fix the cause, the way you would in production: the checks reject shortcuts such as deleting a policy, removing a
   limit, or switching to keys.
-- GitHub Copilot is optional, and needs the attendee's own GitHub account (Copilot Free is enough). It has the
-  AKS-MCP server for their cluster. AI drafts, you verify.
+- GitHub Copilot is optional. Attendees sign in to it through the lab's GitHub single sign-on (Skillable Events), in
+  **Get started**, Task 3. It has the AKS-MCP server for their cluster. AI drafts, you verify.
 - Reset: one command per challenge, 2 to 5 minutes, no confirmation, only the challenge you're working on.
 - If the event has a leaderboard: each check records the attendee's first name and last initial; `-NoReport` keeps a
   run off the board.

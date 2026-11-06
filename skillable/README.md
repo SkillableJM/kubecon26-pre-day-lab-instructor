@@ -75,9 +75,9 @@ Two prerequisites aren't VM settings:
   which `deploy.ps1` gives the same role. [Participant permissions](../docs/participant-permissions.md) has what
   each challenge needs.
 - **MCP servers in Copilot**: a GitHub organization or enterprise policy, off by default, for Copilot Business
-  and Enterprise seats. An owner of the organization that provides the attendees' Copilot seats turns it on
-  (organization **Settings** > **Copilot** > **Policies** > **MCP servers in Copilot**: **Enabled**). See the
-  [LCA runbook](LCA-RUNBOOK.md#before-you-start).
+  and Enterprise seats. Attendees get Copilot from the Skillable Events enterprise, through its single sign-on
+  (the lab instructions' **Get started**, Task 3), so an owner of that enterprise turns it on (enterprise
+  **AI controls** > **MCP**). See the [LCA runbook](LCA-RUNBOOK.md#before-you-start).
 
 ## Readiness checklist for an event profile
 
@@ -98,7 +98,8 @@ Two prerequisites aren't VM settings:
       `.\scoring\verify.ps1 -Quick -NoReport` in the lab repository shows every challenge **NOT PASSED**; and the
       lab instructions' reset command for C1 works as the attendee
 - [ ] Preinstances with at least 45 minutes of lead time, plus spares
-- [ ] Copilot seats for attendees, with the **MCP servers in Copilot** policy on
+- [ ] GitHub Copilot through the Skillable Events single sign-on works in a test launch (the lab instructions'
+      **Get started**, Task 3), and Copilot can use AKS-MCP: the enterprise's **MCP servers in Copilot** policy is on
 - [ ] Decision on a model for `az aks agent` ([LCA runbook](LCA-RUNBOOK.md#github-copilot-aks-mcp-and-az-aks-agent))
 - [ ] Optional: the event leaderboard ([leaderboard/README.md](../leaderboard/README.md))
 

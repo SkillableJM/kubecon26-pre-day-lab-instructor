@@ -46,10 +46,11 @@ repository's commit) and setup logs to the same folder.
   `.lab` folder (ignored by git). The image's Azure CLI stays signed out.
 - **The solutions:** they're in the instructors' repository, which never goes on a lab VM. Don't clone it in the
   image VM.
-- **GitHub sign-ins:** attendees sign in to GitHub Copilot in VS Code with their own account (a Copilot seat).
-  Don't sign in to GitHub in VS Code, the GitHub CLI, or Git while you build the image. `-Finalize` removes
-  GitHub CLI and Git credentials, but VS Code keeps its own sign-ins in its encrypted storage: if you signed in,
-  sign out from VS Code's **Accounts** menu before you finalize.
+- **GitHub sign-ins:** attendees sign in to GitHub Copilot in VS Code through the Skillable Events enterprise's
+  single sign-on (the lab instructions' **Get started**, Task 3). Don't sign in to GitHub in VS Code, the GitHub
+  CLI, or Git while you build the image. `-Finalize` removes GitHub CLI and Git credentials, but VS Code keeps its
+  own sign-ins in its encrypted storage: if you signed in, sign out from VS Code's **Accounts** menu before you
+  finalize.
 - **A model for `az aks agent`:** the extension is installed, but the agent needs a model endpoint and key
   (see the LCA runbook's [GitHub Copilot, AKS-MCP, and az aks agent](LCA-RUNBOOK.md#github-copilot-aks-mcp-and-az-aks-agent)).
 - **Automatic sign-in and the Skillable integration service:** you set these in steps 8 and 9.
