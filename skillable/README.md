@@ -60,7 +60,8 @@ published checksums or signatures:
 - **AKS desktop** and **Inspektor Gadget** (`kubectl gadget`; the prepare LCA can add its AKS cluster extension,
   off by default: see the LCA runbook)
 - **VS Code** with **GitHub Copilot** (built into current VS Code) and the **Kubernetes** and **AKS** extensions,
-  with **AKS-MCP** set up as a user MCP server
+  with **AKS-MCP** set up as a user MCP server, without its `cilium` and `hubble` components, which it can't start
+  without (the prepare LCA sets the same arguments at each launch, and checks that it starts)
 - **PowerShell 7**, **Git** (Git Bash), **Terraform**, **ingress2gateway** (C2), and **WSL** with Ubuntu and the
   Azure CLI, kubectl, kubelogin, and Helm inside it
 - **The lab repository** in `C:\LabFiles\kubecon26-pre-day-lab`, a shallow clone with one commit, opened by VS
@@ -162,6 +163,22 @@ script. Each run's LCA had its own fake service principal ID and secret, and the
 
 Only a Skillable launch can show how its integration service starts the script, and whether it leaves a copy of the
 script on the VM: check a test launch's setup log for the cleanup task's line.
+
+### AKS-MCP (2026-11-05)
+
+In a Skillable launch, Copilot's **Configure Tools** didn't keep **aks-mcp** selected: VS Code's output showed
+`cilium is not installed or not found in PATH`, the same for `hubble`, `Validation failed`, and exit code 1. Without
+`--enabled-components`, aks-mcp 0.0.22 turns on every component, and checks that each one's CLI is on the PATH when
+it starts. The image's checks only looked at `mcp.json`, and never started the server. Tested with the image's pinned
+binary (SHA-256 matched), on Windows:
+
+| Test | Result |
+| --- | --- |
+| The image's earlier arguments (`--access-level readwrite --timeout 600`), with `az`, `kubectl`, and `helm` on the PATH | Exit code 1, `Validation failed` |
+| The same, plus `--enabled-components az_cli,monitor,fleet,network,compute,detectors,advisor,inspektorgadget,kubectl,helm` | Starts, and lists 11 tools: `call_az`, `call_kubectl`, `call_helm`, `inspektor_gadget_observability`, `aks_monitoring`, `aks_network_resources`, `aks_detector`, `aks_advisor_recommendation`, `az_fleet`, `get_aks_vmss_info`, and `collect_aks_node_logs` |
+| The same, with an empty Azure CLI profile (not signed in) | Starts in under a second; aks-mcp doesn't run `az` when it starts |
+| The worker's new step and check, loaded from the script, with a copy of the image's `mcp.json` | The check warned with aks-mcp's errors, the step set the arguments, and the check then passed. A second run changed nothing; other servers and settings in `mcp.json` stayed; with the worker's `AZURE_` variables set, the server got none of them. |
+| The image script's new **AKS-MCP** row, in Windows PowerShell 5.1, with the `mcp.json` its own code writes | Passed with the new arguments; failed with the earlier ones, with aks-mcp's errors |
 
 ### Repository on the VM (2026-11-04)
 

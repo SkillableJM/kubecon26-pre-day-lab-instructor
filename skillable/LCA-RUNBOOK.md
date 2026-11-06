@@ -33,7 +33,7 @@ the settings block, because it doesn't embed the deployment:
 - The VM image has a shallow clone of the lab repository, the folder that attendees work in. The LCA moves it to
   `RepoRef`, a branch or tag of <https://github.com/bbenz/kubecon26-pre-day-lab>, so a reviewer can read exactly
   what runs at that tag.
-- The **worker** (`Invoke-CtfLabSetup.ps1`, about 650 lines), the cleanup task, and the deployment the worker calls
+- The **worker** (`Invoke-CtfLabSetup.ps1`, about 750 lines), the cleanup task, and the deployment the worker calls
   (`deploy.ps1` and `shared/azure-cli-powershell`) are in the lab repository. The deployment is the same one that
   the lab repository's deployment approaches are tested with, that people run by hand, and that attendees run to
   reset a challenge.
@@ -105,6 +105,7 @@ release, and ask the pool admin to change only `RepoRef`.
 | Begin state | Runs the clone's `deploy.ps1 -ResourceGroup <rg> -Location <region> -ClusterName aks-kubecon-ctf -Challenges <list>`: Azure Monitor and Log Analytics workspaces, the AKS Automatic cluster with the application routing add-on (managed NGINX and Gateway API), Managed Prometheus, the C4 Foundry account and model deployment, the A4 Key Vault and identity, and each challenge with its seeded fault. It renders the manifests in the clone's `.lab\rendered\<resource group>`. Its output is in the log. Required: the LCA fails if it fails. |
 | Portal user access | The portal user's roles (see [Identities and roles](#identities-and-roles)). Warning only; the readiness checks fail without the cluster role. |
 | Attendee Azure CLI | The lab user's Azure CLI: browser sign-in (`core.enable_broker_on_windows=false`), so `az login` reuses the attendee's portal session in Edge; no subscription prompt, telemetry, or survey. Removes a service principal sign-in if one is there. The attendee isn't signed in. |
+| AKS-MCP for Copilot | Sets the AKS-MCP server's arguments in the lab user's VS Code user `mcp.json`, the same ones the VM image script writes: `--access-level readwrite --timeout 600 --enabled-components` with every component but `cilium` and `hubble` ([why](#github-copilot-aks-mcp-and-az-aks-agent)). Images built before November 5, 2026 start it without that flag, so it stopped at once; on a current image, the step changes nothing. Keeps any other server in the file. Warning only. |
 | Inspektor Gadget | Only with `InspektorGadget = $true` (off by default): the `microsoft.inspektorgadget` AKS cluster extension (preview), without waiting for it to finish, and up to 4 minutes for a ready `gadget` pod. On AKS Automatic, its DaemonSet never reports every pod ready: an AKS policy (`aks-managed-restrict-hosted-vm-node-pinning`) denies its pods on the AKS-managed hosted system nodes, and a full node leaves its pod (200m CPU, 400 MiB) Pending, so the extension can stay in **Creating**. Pods on the lab's other nodes work, which is what A1's optional DNS tracing needs. Warning only. |
 | Readiness checks | See [Readiness checks](#readiness-checks). |
 | Cloud credentials | Whatever the result, even when a step stopped the run: deletes the worker's Azure CLI profile, and clears the PowerShell event logs. Not in a manual run, or with `RemoveCredentials = 'Never'`. |
@@ -237,7 +238,7 @@ The prepare LCA runs them at the end of each run, and writes them to its log ([L
 | Severity | Checks |
 | --- | --- |
 | Fail | **Azure sign-in** (the worker's profile, in the lab's subscription), **Cluster** (power state Running, and provisioning not Failed; AKS Automatic's own background updates show as Updating), **Nodes** (at least one Ready), **Challenge namespaces** (all selected), **Challenge workloads** (every challenge namespace has pods; some fail on purpose), **Portal user access** (AKS RBAC Cluster Admin), **kubeconfig** (the lab user's current context is the cluster, in kubelogin `azurecli` mode), **Attendee Azure CLI** (not signed in, browser sign-in on), **Lab folder** (the lab repository has `deploy.ps1`, `scoring\verify.ps1`, the PowerShell module, each selected challenge's instructions, and the rendered manifests), **No solutions on the VM** (no `SOLUTION.md`, `FEASIBILITY.md`, or `challenge-end-state` anywhere in `C:\LabFiles`, or in the lab repository's git history) |
-| Warning | **Portal user monitoring access** (Monitoring Data Reader, for A2's dashboards with Grafana), **Inspektor Gadget** (with `InspektorGadget = $true`: at least one `gadget` pod is ready), **Lab tools** (the image's tools, and Azure CLI 2.86 or later) |
+| Warning | **Portal user monitoring access** (Monitoring Data Reader, for A2's dashboards with Grafana), **Inspektor Gadget** (with `InspektorGadget = $true`: at least one `gadget` pod is ready), **Lab tools** (the image's tools, and Azure CLI 2.86 or later), **AKS-MCP for Copilot** (starts `aks-mcp.exe` the way VS Code does, with the lab user's `mcp.json`, and gets its list of tools: no Azure sign-in needed) |
 | Fail, unless `RemoveCredentials` is `Never` | **Cloud credentials removed**: the worker's Azure CLI profile is gone, the PowerShell event logs are cleared, and no event has the service principal's application ID. The cleanup task checks the same again after the LCA ends, in the log's last line. |
 
 ## Test a launch
@@ -261,6 +262,9 @@ The prepare LCA runs them at the end of each run, and writes them to its log ([L
    `Get-ChildItem C:\ -Recurse -Force -Filter SOLUTION.md -ErrorAction SilentlyContinue` finds nothing.
 5. Confirm that the service principal is gone: `C:\ProgramData\kubecon-ctf-lca\azure-cli` doesn't exist, and both
    **Cloud credentials removed** lines in the log passed, the readiness check and the cleanup task's last line.
+6. Confirm that Copilot can use AKS-MCP: the log's **AKS-MCP for Copilot** check passed. In the Copilot Chat view,
+   in **Agent** mode, select **Configure Tools**: **aks-mcp** and its tools are listed and stay selected (select
+   **Trust** if VS Code asks). Ask *Which pods in namespace c1-store aren't ready?*, and allow its tool call.
 
 ## Build the begin state by hand
 
@@ -291,9 +295,15 @@ instructors' repository in a lab VM that an attendee gets.
 ## GitHub Copilot, AKS-MCP, and az aks agent
 
 - **AKS-MCP**: the image installs `aks-mcp.exe` and configures it in the lab user's VS Code `mcp.json`
-  (`--access-level readwrite`). It runs as the attendee, with their `az login` and kubeconfig. VS Code asks the
-  attendee to trust the server the first time it starts. The **MCP servers in Copilot** policy must be on for
-  organization or enterprise Copilot seats (see [Before you start](#before-you-start)).
+  (`--access-level readwrite --timeout 600`, and `--enabled-components` with every component but `cilium` and
+  `hubble`). Without `--enabled-components`, aks-mcp 0.0.22 turns on every component, and doesn't start unless the
+  `cilium` and `hubble` CLIs are on the PATH: VS Code then shows no tools for it, and selecting it in **Configure
+  Tools** doesn't stick. The lab doesn't need them: no challenge uses them, and the lab's clusters don't have
+  Advanced Container Networking Services, so Hubble has nothing to connect to. The prepare LCA sets the same
+  arguments at each launch, and its **AKS-MCP for Copilot** check starts the server. It runs as the attendee, with
+  their `az login` and kubeconfig. VS Code asks the attendee to trust the server the first time it starts. The
+  **MCP servers in Copilot** policy must be on for organization or enterprise Copilot seats (see
+  [Before you start](#before-you-start)).
 - **az aks agent**: the image installs the `aks-agent` extension. The agent needs a large language model: its
   `az aks agent-init` asks for an Azure OpenAI (or other) endpoint and key, and deploys the agent to the cluster
   (cluster mode), or runs it in Docker (client mode, which the lab VM doesn't have). The LCA doesn't configure a
@@ -352,6 +362,8 @@ needs another way to name players.
 | The log has no **Cloud credentials removed, after the prepare LCA ended** line a few minutes after the LCA ended | The cleanup task didn't run, or is still waiting for the LCA's PowerShell (up to 15 minutes). Check the **KubeCon CTF LCA cleanup** task in Task Scheduler, and `C:\ProgramData\kubecon-ctf-lca\cleanup-*.log`. The worker already removed the service principal, but the LCA's last PowerShell events can stay: clear the logs as in the previous row, or discard the preinstance. If the LCA's output says `couldn't start the cleanup task`, it cleared the logs itself; `RepoRef` may be a version without `Invoke-CtfLabCleanup.ps1`. |
 | An attendee's `kubectl` says to run `az login`, or a check can't reach the cluster | Expected until the attendee runs `az login`. If it continues, they signed in with another account: run `az login` again with the lab account. |
 | An attendee's reset command fails | Read its output: it's `deploy.ps1`'s. Run it again; it reuses what exists. `AuthorizationFailed`: the portal user's roles are missing (see the **Portal user access** readiness check in the log). Transient errors, such as an Azure RBAC webhook timeout, are retried; if one still stops it, run it again. |
+| **WARN** AKS-MCP for Copilot: `aks-mcp doesn't start ... (exit code 1): cilium is not installed or not found in PATH ... Validation failed` | The lab user's `mcp.json` starts aks-mcp without `--enabled-components`, and the **AKS-MCP for Copilot** step warned too: read its message. The lab works without Copilot. To fix this VM, use the next row. Another tool in the message, such as `helm`, is missing from the image: rebuild it with the current image script. |
+| Copilot's **Configure Tools** doesn't keep **aks-mcp** selected, or its output (**MCP: List Servers** > **aks-mcp** > **Show Output**) ends with `Validation failed` and `Process exited with code 1` | AKS-MCP stopped at once: its `mcp.json` arguments lack `--enabled-components`. In VS Code, run **MCP: Open User Configuration**, and in the `aks-mcp` server, set `"args": ["--access-level", "readwrite", "--timeout", "600", "--enabled-components", "az_cli,monitor,fleet,network,compute,detectors,advisor,inspektorgadget,kubectl,helm"]`. Save, and select **Restart** above `aks-mcp`. |
 | Manual: `Run this script in PowerShell as administrator` | Open Windows PowerShell with **Run as administrator**, and paste the bootstrap again. |
 | Manual: `Hash mismatch` or `Decode failed` | A part was missed or pasted twice. Open a new window, and paste all the parts again. |
 | Manual: `AuthorizationFailed` on a role assignment in the log | Your lab account isn't Owner of the resource group. See step 1 of [Build the begin state by hand](#build-the-begin-state-by-hand). |
